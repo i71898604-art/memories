@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>신나는 기억력 테스트 게임 - EDM 에디션</title>
+    <!-- Tailwind CSS for modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Tone.js for procedural upbeat EDM background music and sound effects -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Noto+Sans+KR:wght@400;700;900&display=swap');
+        
+        body {
+            font-family: 'Fredoka', 'Noto Sans KR', sans-serif;
+            background: radial-gradient(circle at center, #1b0c36 0%, #0d061a 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background 0.5s ease;
+        }
+
+        @keyframes emergencyPulse {
+            0%, 100% { background: radial-gradient(circle at center, #3d0c15 0%, #1a0609 100%); }
+            50% { background: radial-gradient(circle at center, #7f1d1d 0%, #2b0a0e 100%); }
+        }
+
+        .emergency-mode {
+            animation: emergencyPulse 0.8s infinite ease-in-out;
+        }
+
+        .pulse-pop {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.15); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .shake {
+            animation: shakeAnim 0.4s ease-in-out;
+        }
+
+        @keyframes shakeAnim {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        .correct-burst {
+            animation: burstAnim 0.4s ease-out forwards;
+        }
+
+        @keyframes burstAnim {
+            0% { transform: scale(0.8); background-color: #10B981; box-shadow: 0 0 15px #34D399; }
+            50% { transform: scale(1.3); background-color: #34D399; box-shadow: 0 0 30px #10B981; }
+            100% { transform: scale(1); background-color: #059669; box-shadow: 0 0 10px #059669; }
+        }
+
+        .edm-glow {
+            box-shadow: 0 0 25px rgba(236, 72, 153, 0.5), inset 0 0 15px rgba(6, 182, 212, 0.3);
+        }
+    </style>
+</head>
+<body id="main-body" class="flex flex-col items-center justify-center p-4">
+
+    <header class="text-center mb-6">
+        <h1 class="text-4xl md:text-5xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-300 to-cyan-400 drop-shadow-[0_0_15px_rgba(236,72,153,0.7)]">
+            ⚡ EDM 기억력 챌린지 ⚡
+        </h1>
+        <p class="text-sm md:text-base text-purple-200 mt-2 font-medium">
+            신나는 EDM 사운드와 함께 알파벳 순서를 완벽하게 기억하세요!
+        </p>
+    </header>
+
+    <main class="w-full max-w-xl bg-white/10 backdrop-blur-md rounded-3xl p-6 md:p-8 shadow-2xl border border-white/20 flex flex-col items-center relative min-h-[420px] justify-center edm-glow">
+
+        <!-- Initial Start Screen -->
+        <div id="start-screen" class="flex flex-col items-center text-center space-y-6 w-full">
+            <div class="w-24 h-24 bg-gradient-to-tr from-pink-500 via-purple-600 to-cyan-400 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(236,72,153,0.8)] pulse-pop">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </div>
+            <div>
+                <h2 class="text-2xl font-bold text-white mb-1">파워풀한 EDM 비트 장착 완료!</h2>
+                <p class="text-sm text-cyan-300">볼륨을 높이고 시작 버튼을 누르세요.</p>
+            </div>
+            <button id="start-btn" class="w-full py-4 bg-gradient-to-r from-pink-500 via-purple-600 to-cyan-400 hover:opacity-90 active:scale-95 transition-all text-white font-bold text-xl rounded-2xl shadow-[0_0_20px_rgba(168,85,247,0.6)] cursor-pointer">
+                EDM 파티 시작하기 🚀
+            </button>
+        </div>
+
+        <!-- Countdown Screen (3, 2, 1) -->
+        <div id="countdown-screen" class="hidden flex flex-col items-center justify-center space-y-4">
+            <div id="countdown-number" class="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-cyan-400 drop-shadow-[0_0_20px_rgba(6,182,212,0.8)] pulse-pop">
+                3
+            </div>
+            <p class="text-lg text-purple-200 font-semibold animate-pulse">비트에 맞춰 준비하세요...</p>
+        </div>
+
+        <!-- Showing Sequence Screen -->
+        <div id="sequence-screen" class="hidden flex flex-col items-center justify-center space-y-6 w-full">
+            <div class="text-sm font-semibold text-cyan-300 uppercase tracking-widest bg-cyan-900/60 px-4 py-1.5 rounded-full border border-cyan-400/30">
+                라운드 <span id="current-round">1</span> - 순서 기억 중!
+            </div>
+            <div id="display-box" class="h-40 w-full bg-black/40 rounded-2xl flex items-center justify-center border border-pink-500/30 shadow-[inset_0_0_20px_rgba(236,72,153,0.3)]">
+                <span id="sequence-char" class="text-7xl md:text-8xl font-black text-pink-400 drop-shadow-[0_0_20px_rgba(236,72,153,0.8)] pulse-pop">A</span>
+            </div>
+            <div class="w-full bg-white/10 h-2.5 rounded-full overflow-hidden shadow-inner">
+                <div id="sequence-progress" class="bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-400 h-full w-0 transition-all duration-100 shadow-[0_0_10px_rgba(236,72,153,0.8)]"></div>
+            </div>
+        </div>
+
+        <!-- Input Screen -->
+        <div id="input-screen" class="hidden flex flex-col items-center justify-center space-y-6 w-full relative">
+            <div class="text-center">
+                <h3 class="text-xl font-bold text-white mb-1">기억한 순서대로 입력하세요!</h3>
+                <p id="coach-msg" class="text-xs text-pink-300 font-semibold animate-pulse">키보드를 누르거나 아래 가상 건반을 터치하세요</p>
+            </div>
+
+            <!-- Timer Bar -->
+            <div class="w-full flex items-center space-x-3 bg-black/30 px-4 py-2 rounded-xl border border-cyan-500/30">
+                <div class="text-xs font-bold text-cyan-400 whitespace-nowrap">남은 시간: <span id="timer-text">10.0</span>초</div>
+                <div class="w-full bg-white/10 h-3 rounded-full overflow-hidden shadow-inner">
+                    <div id="timer-progress" class="bg-gradient-to-r from-cyan-400 to-pink-500 h-full w-full transition-all duration-100"></div>
+                </div>
+            </div>
+
+            <!-- Visual Slots for Input -->
+            <div id="input-slots" class="flex flex-wrap justify-center gap-2 md:gap-3 max-w-full my-2">
+                <!-- Dynamic slots injected via JS -->
+            </div>
+
+            <!-- Feedback / Congratulatory Burst container -->
+            <div id="feedback-popup" class="absolute inset-0 bg-black/70 backdrop-blur-md rounded-3xl flex flex-col items-center justify-center hidden z-20">
+                <div id="feedback-icon" class="w-24 h-24 rounded-full flex items-center justify-center text-5xl mb-3 shadow-2xl"></div>
+                <h4 id="feedback-text" class="text-2xl font-black text-white">정답입니다! 🎉</h4>
+            </div>
+        </div>
+
+        <!-- Game Over / Success Screen -->
+        <div id="gameover-screen" class="hidden flex flex-col items-center justify-center space-y-6 w-full text-center">
+            <div id="result-icon" class="text-6xl animate-bounce">💥</div>
+            <div>
+                <h3 id="result-title" class="text-3xl font-black text-white mb-2">틀렸습니다!</h3>
+                <p id="result-desc" class="text-purple-200 text-sm">아쉽네요! 다시 EDM 비트에 맞춰 도전해보세요.</p>
+            </div>
+            <div class="bg-white/5 rounded-2xl p-4 w-full border border-white/10">
+                <p class="text-sm text-purple-300">최종 달성 라운드</p>
+                <p id="final-score" class="text-4xl font-black text-cyan-300 mt-1">라운드 1 / 10</p>
+            </div>
+            <button id="restart-btn" class="w-full py-4 bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-95 active:scale-95 transition-all text-white font-bold text-lg rounded-2xl shadow-[0_0_20px_rgba(236,72,153,0.6)] cursor-pointer">
+                다시 시작하기 🔄
+            </button>
+        </div>
+
+    </main>
+
+    <footer class="w-full max-w-xl mt-6 flex flex-col items-center">
+        <div id="virtual-keyboard" class="hidden grid grid-cols-7 gap-1.5 md:gap-2 w-full max-w-md bg-white/5 p-3 rounded-2xl border border-white/10 backdrop-blur-sm">
+            <!-- Dynamically populated buttons -->
+        </div>
+        <p class="text-xs text-purple-300 mt-4">Powered by Tone.js EDM Synth & Tailwind CSS</p>
+    </footer>
+
+    <script>
+        // DOM Element references
+        const startScreen = document.getElementById('start-screen');
+        const countdownScreen = document.getElementById('countdown-screen');
+        const countdownNumber = document.getElementById('countdown-number');
+        const sequenceScreen = document.getElementById('sequence-screen');
+        const currentRoundEl = document.getElementById('current-round');
+        const sequenceCharEl = document.getElementById('sequence-char');
+        const sequenceProgress = document.getElementById('sequence-progress');
+        const inputScreen = document.getElementById('input-screen');
+        const coachMsg = document.getElementById('coach-msg');
+        const timerText = document.getElementById('timer-text');
+        const timerProgress = document.getElementById('timer-progress');
+        const inputSlots = document.getElementById('input-slots');
+        const feedbackPopup = document.getElementById('feedback-popup');
+        const feedbackIcon = document.getElementById('feedback-icon');
+        const feedbackText = document.getElementById('feedback-text');
+        const gameoverScreen = document.getElementById('gameover-screen');
+        const resultIcon = document.getElementById('result-icon');
+        const resultTitle = document.getElementById('result-title');
+        const resultDesc = document.getElementById('result-desc');
+        const finalScoreEl = document.getElementById('final-score');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const virtualKeyboard = document.getElementById('virtual-keyboard');
+
+        // Game State
+        const MAX_ROUNDS = 10;
+        let currentRound = 1;
+        let sequence = [];
+        let currentIndex = 0;
+        let isPlayingSequence = false;
+        
+        // Timer variables
+        let inputTimer = null;
+        let timeLeft = 10.0;
+        const totalInputTime = 10.0;
+        let lastSpokenSecond = 6;
+
+        // Audio instruments
+        let leadSynth = null;
+        let kickSynth = null;
+        let hihatSynth = null;
+        let bassSynth = null;
+        let edmLoop = null;
+
+        // Alphabet pool
+        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+
+        // Initialize Tone.js high-energy EDM sound engine
+        function initEdmAudio() {
+            try {
+                Tone.start();
+
+                leadSynth = new Tone.Synth({
+                    oscillator: { type: "sawtooth" },
+                    envelope: { attack: 0.005, decay: 0.15, sustain: 0.1, release: 0.3 }
+                }).toDestination();
+                leadSynth.volume.value = -4;
+
+                kickSynth = new Tone.MembraneSynth({
+                    pitchDecay: 0.05,
+                    octaves: 6,
+                    oscillator: { type: "sine" },
+                    envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 0.4 }
+                }).toDestination();
+
+                hihatSynth = new Tone.NoiseSynth({
+                    noise: { type: "white" },
+                    envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.05 }
+                }).toDestination();
+                hihatSynth.volume.value = -10;
+
+                bassSynth = new Tone.Synth({
+                    oscillator: { type: "square" },
+                    envelope: { attack: 0.01, decay: 0.2, sustain: 0.2, release: 0.2 }
+                }).toDestination();
+                bassSynth.volume.value = -6;
+
+                const melodyNotes = ["C4", "Eb4", "G4", "Bb4", "C5", "G4", "Eb4", "F4"];
+                let step = 0;
+
+                if (edmLoop) edmLoop.dispose();
+
+                // Base EDM tempo 130 BPM
+                Tone.Transport.bpm.value = 130;
+
+                edmLoop = new Tone.Loop(time => {
+                    if (step % 2 === 0) {
+                        kickSynth.triggerAttackRelease("C1", "8n", time);
+                    }
+                    hihatSynth.triggerAttackRelease("16n", time);
+                    leadSynth.triggerAttackRelease(melodyNotes[step % melodyNotes.length], "8n", time);
+                    step++;
+                }, "8n");
+
+                edmLoop.start(0);
+                Tone.Transport.start();
+
+            } catch (e) {
+                console.warn("EDM Audio Context initialization warning:", e);
+            }
+        }
+
+        // Play feedback notes or user input tones
+        function playTone(note, duration = "8n") {
+            if (leadSynth) {
+                try {
+                    leadSynth.triggerAttackRelease(note, duration);
+                } catch (e) {}
+            }
+        }
+
+        // Browser Speech Synthesis for countdown and side coaching
+        function speakText(text) {
+            if ('speechSynthesis' in window) {
+                try {
+                    window.speechSynthesis.cancel();
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.lang = 'ko-KR';
+                    utterance.rate = 1.2;
+                    window.speechSynthesis.speak(utterance);
+                } catch (e) {}
+            }
+        }
+
+        // Generate random sequence based on round length (Length grows from 3 to 12)
+        function generateSequence(length) {
+            let seq = [];
+            for (let i = 0; i < length; i++) {
+                const randomChar = alphabet[Math.floor(Math.random() * alphabet.length)];
+                seq.push(randomChar);
+            }
+            return seq;
+        }
+
+        // Start Game Flow
+        startBtn.addEventListener('click', () => {
+            initEdmAudio();
+            currentRound = 1;
+            startScreen.classList.add('hidden');
+            runCountdown();
+        });
+
+        restartBtn.addEventListener('click', () => {
+            currentRound = 1;
+            gameoverScreen.classList.add('hidden');
+            runCountdown();
+        });
+
+        // Countdown 3 -> 2 -> 1
+        function runCountdown() {
+            countdownScreen.classList.remove('hidden');
+            let count = 3;
+            countdownNumber.textContent = count;
+            playTone("C5", "4n");
+            speakText("3");
+
+            const timer = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdownNumber.textContent = count;
+                    countdownNumber.classList.remove('pulse-pop');
+                    void countdownNumber.offsetWidth; 
+                    countdownNumber.classList.add('pulse-pop');
+                    playTone("Eb5", "4n");
+                    speakText(count.toString());
+                } else if (count === 0) {
+                    countdownNumber.textContent = "LET'S GO! 🔥";
+                    playTone("G5", "4n");
+                    speakText("시작!");
+                } else {
+                    clearInterval(timer);
+                    countdownScreen.classList.add('hidden');
+                    startRound();
+                }
+            }, 800);
+        }
+
+        // Start a specific Round
+        function startRound() {
+            sequenceScreen.classList.remove('hidden');
+            currentRoundEl.textContent = `${currentRound} / ${MAX_ROUNDS}`;
+            
+            // Sequence length increases with round: Round 1=3, up to Round 10=12
+            const seqLength = 2 + currentRound;
+            sequence = generateSequence(seqLength);
+            currentIndex = 0;
+            isPlayingSequence = true;
+
+            showSequenceStep(0);
+        }
+
+        // Display sequence one by one (Speed increases as rounds progress)
+        function showSequenceStep(index) {
+            if (index < sequence.length) {
+                sequenceCharEl.textContent = sequence[index];
+                sequenceCharEl.classList.remove('pulse-pop');
+                void sequenceCharEl.offsetWidth;
+                sequenceCharEl.classList.add('pulse-pop');
+                
+                const notesPool = ["C5", "Eb5", "G5", "Bb5", "C6", "G5", "Eb5"];
+                playTone(notesPool[index % notesPool.length], "8n");
+
+                const progressPercent = ((index + 1) / sequence.length) * 100;
+                sequenceProgress.style.width = `${progressPercent}%`;
+
+                // Progressive speed: Round 1 is slower (~850ms), Round 10 is super fast (~350ms)
+                const displayDuration = Math.max(350, 900 - (currentRound * 55));
+                
+                setTimeout(() => {
+                    showSequenceStep(index + 1);
+                }, displayDuration);
+            } else {
+                isPlayingSequence = false;
+                setTimeout(() => {
+                    sequenceScreen.classList.add('hidden');
+                    setupInputPhase();
+                }, 400);
+            }
+        }
+
+        // Setup Input Phase UI with 10s Timer & Side Coaching
+        function setupInputPhase() {
+            inputScreen.classList.remove('hidden');
+            inputSlots.innerHTML = '';
+            currentIndex = 0;
+            timeLeft = 10.0;
+            lastSpokenSecond = 6;
+
+            // Dynamic side-coaching prompts based on round difficulty
+            const coachMessages = [
+                "차분하게 순서대로 입력하세요!",
+                "벌써 긴장되나요? 집중하세요!",
+                "손을 바쁘게 움직여봐요!",
+                "시간이 얼마 없어요, 서두르세요!",
+                "놓치면 끝입니다! 정신 바짝 차려요!",
+                "비트가 빨라집니다! 타이머 작동 중!",
+                "조급해지지 말고 정확하게!",
+                "거의 다 왔어요! 속도 내세요!",
+                "극도의 긴장감! 실수하면 탈락입니다!",
+                "마지막 결전 라운드! 모든 걸 쏟아부으세요!"
+            ];
+            coachMsg.textContent = coachMessages[(currentRound - 1) % coachMessages.length];
+
+            for (let i = 0; i < sequence.length; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'w-11 h-13 md:w-13 md:h-15 bg-white/10 border-2 border-white/30 rounded-xl flex items-center justify-center text-2xl md:text-3xl font-black text-white shadow-inner transition-all duration-200';
+                slot.id = `slot-${i}`;
+                slot.textContent = '_';
+                inputSlots.appendChild(slot);
+            }
+
+            setupVirtualKeyboard();
+            startInputTimer();
+        }
+
+        // Start 10-second timer countdown
+        function startInputTimer() {
+            if (inputTimer) clearInterval(inputTimer);
+
+            const startTime = Date.now();
+            const durationMs = 10000; // 10 seconds
+
+            inputTimer = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                timeLeft = Math.max(0, (durationMs - elapsed) / 1000);
+
+                timerText.textContent = timeLeft.toFixed(1);
+                const percent = (timeLeft / totalInputTime) * 100;
+                timerProgress.style.width = `${percent}%`;
+
+                // Audio countdown & red emergency background for final 5 seconds
+                const currentSecCeil = Math.ceil(timeLeft);
+                if (currentSecCeil <= 5 && currentSecCeil > 0) {
+                    // Activate emergency red pulsating background
+                    document.getElementById('main-body').classList.add('emergency-mode');
+
+                    if (currentSecCeil < lastSpokenSecond) {
+                        lastSpokenSecond = currentSecCeil;
+                        playTone("G3", "8n");
+                        speakText(currentSecCeil.toString());
+                    }
+                } else {
+                    document.getElementById('main-body').classList.remove('emergency-mode');
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(inputTimer);
+                    document.getElementById('main-body').classList.remove('emergency-mode');
+                    virtualKeyboard.classList.add('hidden');
+                    showGameOverScreen(false, "시간 초과! 너무 늦었습니다!");
+                }
+            }, 100);
+        }
+
+        // Populate virtual keyboard
+        function setupVirtualKeyboard() {
+            virtualKeyboard.classList.remove('hidden');
+            virtualKeyboard.innerHTML = '';
+            
+            const keys = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+            keys.forEach(char => {
+                const btn = document.createElement('button');
+                btn.className = 'py-2 bg-white/10 hover:bg-white/25 active:bg-cyan-500 rounded-lg text-white font-bold text-sm md:text-base border border-white/15 shadow-[0_0_10px_rgba(255,255,255,0.05)] transition-all cursor-pointer';
+                btn.textContent = char;
+                btn.addEventListener('click', () => handleInput(char));
+                virtualKeyboard.appendChild(btn);
+            });
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (isPlayingSequence || inputScreen.classList.contains('hidden')) return;
+            const key = e.key.toUpperCase();
+            if (/^[A-Z]$/.test(key)) {
+                handleInput(key);
+            }
+        });
+
+        // Handle user typing
+        function handleInput(char) {
+            if (isPlayingSequence || inputScreen.classList.contains('hidden')) return;
+
+            const expectedChar = sequence[currentIndex];
+            const currentSlot = document.getElementById(`slot-${currentIndex}`);
+
+            if (char === expectedChar) {
+                currentSlot.textContent = char;
+                currentSlot.classList.remove('bg-white/10', 'border-white/30');
+                currentSlot.classList.add('correct-burst');
+                
+                playTone("C6", "16n");
+                triggerMiniBurst(currentSlot);
+
+                currentIndex++;
+
+                if (currentIndex === sequence.length) {
+                    clearInterval(inputTimer);
+                    virtualKeyboard.classList.add('hidden');
+                    
+                    if (currentRound >= MAX_ROUNDS) {
+                        showGameOverScreen(true);
+                    } else {
+                        showSuccessFeedback();
+                    }
+                }
+            } else {
+                clearInterval(inputTimer);
+                currentSlot.textContent = char;
+                currentSlot.classList.add('bg-red-500/50', 'border-red-500', 'shake');
+                playTone("G2", "4n");
+                
+                virtualKeyboard.classList.add('hidden');
+                setTimeout(() => {
+                    showGameOverScreen(false, "틀렸습니다! 처음부터 다시 도전!");
+                }, 600);
+            }
+        }
+
+        function triggerMiniBurst(element) {
+            const rect = element.getBoundingClientRect();
+            const circle = document.createElement('div');
+            circle.className = 'fixed pointer-events-none rounded-full bg-cyan-400/80 z-50 shadow-[0_0_20px_#22d3ee]';
+            circle.style.width = '35px';
+            circle.style.height = '35px';
+            circle.style.left = `${rect.left + rect.width / 2 - 17}px`;
+            circle.style.top = `${rect.top + rect.height / 2 - 17}px`;
+            circle.style.transition = 'all 0.4s ease-out';
+            document.body.appendChild(circle);
+
+            setTimeout(() => {
+                circle.style.transform = 'scale(4)';
+                circle.style.opacity = '0';
+            }, 10);
+
+            setTimeout(() => {
+                circle.remove();
+            }, 400);
+        }
+
+        function showSuccessFeedback() {
+            document.getElementById('main-body').classList.remove('emergency-mode');
+            feedbackIcon.textContent = "🔥";
+            feedbackIcon.className = "w-24 h-24 rounded-full flex items-center justify-center text-5xl mb-3 shadow-[0_0_30px_rgba(6,182,212,0.9)] bg-gradient-to-tr from-cyan-400 to-pink-500 pulse-pop";
+            feedbackText.textContent = `라운드 ${currentRound} 클리어! 🚀`;
+            feedbackPopup.classList.remove('hidden');
+
+            playTone("Eb6", "8n");
+            setTimeout(() => playTone("G6", "8n"), 150);
+
+            setTimeout(() => {
+                feedbackPopup.classList.add('hidden');
+                inputScreen.classList.add('hidden');
+                currentRound++;
+                runCountdown();
+            }, 1200);
+        }
+
+        function showGameOverScreen(isSuccess, customMsg = "") {
+            document.getElementById('main-body').classList.remove('emergency-mode');
+            inputScreen.classList.add('hidden');
+            gameoverScreen.classList.remove('hidden');
+            virtualKeyboard.classList.add('hidden');
+
+            if (isSuccess) {
+                resultIcon.textContent = "👑";
+                resultTitle.textContent = "10라운드 최종 마스터 달성!";
+                resultDesc.textContent = "대단합니다! 모든 비트와 제한시간을 극복하셨습니다!";
+                speakText("축하합니다. 10라운드 마스터 달성!");
+            } else {
+                resultIcon.textContent = "💥";
+                resultTitle.textContent = "게임 오버!";
+                resultDesc.textContent = customMsg || "아쉽네요! 다시 도전해보세요.";
+                speakText("게임 오버!");
+            }
+            finalScoreEl.textContent = `라운드 ${currentRound} / ${MAX_ROUNDS}`;
+        }
+    </script>
+</body>
+</html>
