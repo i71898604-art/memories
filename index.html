@@ -216,35 +216,47 @@
         // Alphabet pool
         const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
-        // Initialize Tone.js high-energy EDM sound engine
-        function initEdmAudio() {
+        // Initialize Tone.js high-energy EDM sound engine with explicit mobile audio context resume
+        async function initEdmAudio() {
             try {
-                Tone.start();
+                // Required for mobile browsers (iOS Safari / Chrome Android) to unlock audio playback
+                await Tone.start();
+                if (Tone.context.state !== 'running') {
+                    await Tone.context.resume();
+                }
 
-                leadSynth = new Tone.Synth({
-                    oscillator: { type: "sawtooth" },
-                    envelope: { attack: 0.005, decay: 0.15, sustain: 0.1, release: 0.3 }
-                }).toDestination();
-                leadSynth.volume.value = -4;
+                if (!leadSynth) {
+                    leadSynth = new Tone.Synth({
+                        oscillator: { type: "sawtooth" },
+                        envelope: { attack: 0.005, decay: 0.15, sustain: 0.1, release: 0.3 }
+                    }).toDestination();
+                    leadSynth.volume.value = -4;
+                }
 
-                kickSynth = new Tone.MembraneSynth({
-                    pitchDecay: 0.05,
-                    octaves: 6,
-                    oscillator: { type: "sine" },
-                    envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 0.4 }
-                }).toDestination();
+                if (!kickSynth) {
+                    kickSynth = new Tone.MembraneSynth({
+                        pitchDecay: 0.05,
+                        octaves: 6,
+                        oscillator: { type: "sine" },
+                        envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 0.4 }
+                    }).toDestination();
+                }
 
-                hihatSynth = new Tone.NoiseSynth({
-                    noise: { type: "white" },
-                    envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.05 }
-                }).toDestination();
-                hihatSynth.volume.value = -10;
+                if (!hihatSynth) {
+                    hihatSynth = new Tone.NoiseSynth({
+                        noise: { type: "white" },
+                        envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.05 }
+                    }).toDestination();
+                    hihatSynth.volume.value = -10;
+                }
 
-                bassSynth = new Tone.Synth({
-                    oscillator: { type: "square" },
-                    envelope: { attack: 0.01, decay: 0.2, sustain: 0.2, release: 0.2 }
-                }).toDestination();
-                bassSynth.volume.value = -6;
+                if (!bassSynth) {
+                    bassSynth = new Tone.Synth({
+                        oscillator: { type: "square" },
+                        envelope: { attack: 0.01, decay: 0.2, sustain: 0.2, release: 0.2 }
+                    }).toDestination();
+                    bassSynth.volume.value = -6;
+                }
 
                 const melodyNotes = ["C4", "Eb4", "G4", "Bb4", "C5", "G4", "Eb4", "F4"];
                 let step = 0;
@@ -280,19 +292,6 @@
             }
         }
 
-        // Browser Speech Synthesis for countdown and side coaching
-        function speakText(text) {
-            if ('speechSynthesis' in window) {
-                try {
-                    window.speechSynthesis.cancel();
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.lang = 'ko-KR';
-                    utterance.rate = 1.2;
-                    window.speechSynthesis.speak(utterance);
-                } catch (e) {}
-            }
-        }
-
         // Generate random sequence based on round length (Length grows from 3 to 12)
         function generateSequence(length) {
             let seq = [];
@@ -304,26 +303,26 @@
         }
 
         // Start Game Flow
-        startBtn.addEventListener('click', () => {
-            initEdmAudio();
+        startBtn.addEventListener('click', async () => {
+            await initEdmAudio();
             currentRound = 1;
             startScreen.classList.add('hidden');
             runCountdown();
         });
 
-        restartBtn.addEventListener('click', () => {
+        restartBtn.addEventListener('click', async () => {
+            await initEdmAudio();
             currentRound = 1;
             gameoverScreen.classList.add('hidden');
             runCountdown();
         });
 
-        // Countdown 3 -> 2 -> 1
+        // Countdown 3 -> 2 -> 1 (Purely visual & musical tone to guarantee consistency on mobile)
         function runCountdown() {
             countdownScreen.classList.remove('hidden');
             let count = 3;
             countdownNumber.textContent = count;
             playTone("C5", "4n");
-            speakText("3");
 
             const timer = setInterval(() => {
                 count--;
@@ -333,11 +332,9 @@
                     void countdownNumber.offsetWidth; 
                     countdownNumber.classList.add('pulse-pop');
                     playTone("Eb5", "4n");
-                    speakText(count.toString());
                 } else if (count === 0) {
                     countdownNumber.textContent = "LET'S GO! 🔥";
                     playTone("G5", "4n");
-                    speakText("시작!");
                 } else {
                     clearInterval(timer);
                     countdownScreen.classList.add('hidden');
@@ -439,7 +436,7 @@
                 const percent = (timeLeft / totalInputTime) * 100;
                 timerProgress.style.width = `${percent}%`;
 
-                // Audio countdown & red emergency background for final 5 seconds
+                // Audio countdown beep & red emergency background for final 5 seconds
                 const currentSecCeil = Math.ceil(timeLeft);
                 if (currentSecCeil <= 5 && currentSecCeil > 0) {
                     // Activate emergency red pulsating background
@@ -448,7 +445,6 @@
                     if (currentSecCeil < lastSpokenSecond) {
                         lastSpokenSecond = currentSecCeil;
                         playTone("G3", "8n");
-                        speakText(currentSecCeil.toString());
                     }
                 } else {
                     document.getElementById('main-body').classList.remove('emergency-mode');
@@ -575,12 +571,10 @@
                 resultIcon.textContent = "👑";
                 resultTitle.textContent = "10라운드 최종 마스터 달성!";
                 resultDesc.textContent = "대단합니다! 모든 비트와 제한시간을 극복하셨습니다!";
-                speakText("축하합니다. 10라운드 마스터 달성!");
             } else {
                 resultIcon.textContent = "💥";
                 resultTitle.textContent = "게임 오버!";
                 resultDesc.textContent = customMsg || "아쉽네요! 다시 도전해보세요.";
-                speakText("게임 오버!");
             }
             finalScoreEl.textContent = `라운드 ${currentRound} / ${MAX_ROUNDS}`;
         }
