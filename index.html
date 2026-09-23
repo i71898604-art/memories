@@ -3,371 +3,581 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EDM 메모리 챌린지</title>
-    <!-- Tailwind CSS -->
+    <title>신나는 기억력 테스트 게임 - EDM 에디션</title>
+    <!-- Tailwind CSS for modern styling -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Tone.js -->
+    <!-- Tone.js for procedural upbeat EDM background music and sound effects -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <style>
-        @keyframes pulse-red {
-            0%, 100% { background-color: rgba(239, 68, 68, 0.4); }
-            50% { background-color: rgba(239, 68, 68, 0.8); }
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Noto+Sans+KR:wght@400;700;900&display=swap');
+        
+        body {
+            font-family: 'Fredoka', 'Noto Sans KR', sans-serif;
+            background: radial-gradient(circle at center, #1b0c36 0%, #0d061a 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            transition: background 0.5s ease;
         }
-        .bg-emergency {
-            animation: pulse-red 0.8s infinite;
+
+        @keyframes emergencyPulse {
+            0%, 100% { background: radial-gradient(circle at center, #3d0c15 0%, #1a0609 100%); }
+            50% { background: radial-gradient(circle at center, #7f1d1d 0%, #2b0a0e 100%); }
         }
-        @keyframes pop {
+
+        .emergency-mode {
+            animation: emergencyPulse 0.8s infinite ease-in-out;
+        }
+
+        .pulse-pop {
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        @keyframes popIn {
             0% { transform: scale(0.5); opacity: 0; }
-            70% { transform: scale(1.2); opacity: 1; }
+            70% { transform: scale(1.15); opacity: 1; }
             100% { transform: scale(1); opacity: 1; }
         }
-        .pop-effect {
-            animation: pop 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+
+        .shake {
+            animation: shakeAnim 0.4s ease-in-out;
+        }
+
+        @keyframes shakeAnim {
+            0%, 100% { transform: translateX(0); }
+            20%, 60% { transform: translateX(-10px); }
+            40%, 80% { transform: translateX(10px); }
+        }
+
+        .correct-burst {
+            animation: burstAnim 0.4s ease-out forwards;
+        }
+
+        @keyframes burstAnim {
+            0% { transform: scale(0.8); background-color: #10B981; box-shadow: 0 0 15px #34D399; }
+            50% { transform: scale(1.3); background-color: #34D399; box-shadow: 0 0 30px #10B981; }
+            100% { transform: scale(1); background-color: #059669; box-shadow: 0 0 10px #059669; }
+        }
+
+        .edm-glow {
+            box-shadow: 0 0 25px rgba(236, 72, 153, 0.5), inset 0 0 15px rgba(6, 182, 212, 0.3);
         }
     </style>
 </head>
-<body id="body-bg" class="bg-slate-950 text-white min-h-screen flex flex-col items-center justify-center font-sans select-none overflow-hidden transition-colors duration-300">
+<body id="main-body" class="flex flex-col items-center justify-center p-4">
 
-    <!-- 메인 컨테이너 -->
-    <div id="game-container" class="w-full max-w-md p-6 flex flex-col items-center justify-center relative z-10">
-        
-        <!-- 타이틀 / 상태바 -->
-        <div id="header-section" class="text-center mb-6">
-            <h1 class="text-3xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-fuchsia-500 mb-2">EDM MEMORY</h1>
-            <div id="status-bar" class="flex justify-center gap-6 text-sm font-semibold text-slate-400 hidden">
-                <span id="round-display">라운드: 1 / 10</span>
-                <span id="score-display">점수: 0</span>
+    <header class="text-center mb-6">
+        <h1 class="text-4xl md:text-5xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-300 to-cyan-400 drop-shadow-[0_0_15px_rgba(236,72,153,0.7)]">
+            ⚡ EDM 기억력 챌린지 ⚡
+        </h1>
+        <p class="text-sm md:text-base text-purple-200 mt-2 font-medium">
+            신나는 EDM 사운드와 함께 알파벳 순서를 완벽하게 기억하세요!
+        </p>
+    </header>
+
+    <main class="w-full max-w-xl bg-white/10 backdrop-blur-md rounded-3xl p-6 md:p-8 shadow-2xl border border-white/20 flex flex-col items-center relative min-h-[420px] justify-center edm-glow">
+
+        <!-- Initial Start Screen -->
+        <div id="start-screen" class="flex flex-col items-center text-center space-y-6 w-full">
+            <div class="w-24 h-24 bg-gradient-to-tr from-pink-500 via-purple-600 to-cyan-400 rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(236,72,153,0.8)] pulse-pop">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-white animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
             </div>
-        </div>
-
-        <!-- 메인 디스플레이 박스 -->
-        <div id="display-box" class="w-full h-48 bg-slate-900/80 border-2 border-slate-800 rounded-2xl flex flex-col items-center justify-center shadow-2xl backdrop-blur-md mb-6 relative overflow-hidden">
-            <div id="message-area" class="text-2xl font-bold text-center text-cyan-300 px-4">
-                버튼을 눌러 게임을 시작하세요!
+            <div>
+                <h2 class="text-2xl font-bold text-white mb-1">파워풀한 EDM 비트 장착 완료!</h2>
+                <p class="text-sm text-cyan-300">볼륨을 높이고 시작 버튼을 누르세요.</p>
             </div>
-            
-            <!-- 입력 단계용 타이머 바 -->
-            <div id="timer-bar-container" class="w-full absolute bottom-0 left-0 h-2 bg-slate-800 hidden">
-                <div id="timer-bar" class="h-full bg-gradient-to-r from-cyan-500 to-fuchsia-500 w-full transition-all duration-100"></div>
-            </div>
-        </div>
-
-        <!-- 입력 슬롯 (입력 단계에서 나타남) -->
-        <div id="input-slots" class="flex flex-wrap justify-center gap-2 mb-6 min-h-[4rem]"></div>
-
-        <!-- 사이드 코칭 메시지 -->
-        <div id="coach-message" class="text-xs font-bold text-fuchsia-400 h-6 mb-4 text-center tracking-widest uppercase"></div>
-
-        <!-- 컨트롤 버튼 -->
-        <div id="control-area" class="w-full">
-            <button id="start-btn" onclick="startGame()" class="w-full py-4 bg-gradient-to-r from-cyan-500 to-fuchsia-600 rounded-xl font-extrabold text-lg shadow-lg shadow-cyan-500/30 hover:opacity-90 active:scale-95 transition-all">
-                게임 시작
+            <button id="start-btn" class="w-full py-4 bg-gradient-to-r from-pink-500 via-purple-600 to-cyan-400 hover:opacity-90 active:scale-95 transition-all text-white font-bold text-xl rounded-2xl shadow-[0_0_20px_rgba(168,85,247,0.6)] cursor-pointer">
+                EDM 파티 시작하기 🚀
             </button>
         </div>
 
-    </div>
+        <!-- Countdown Screen (3, 2, 1) -->
+        <div id="countdown-screen" class="hidden flex flex-col items-center justify-center space-y-4">
+            <div id="countdown-number" class="text-8xl font-black text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-cyan-400 drop-shadow-[0_0_20px_rgba(6,182,212,0.8)] pulse-pop">
+                3
+            </div>
+            <p class="text-lg text-purple-200 font-semibold animate-pulse">비트에 맞춰 준비하세요...</p>
+        </div>
+
+        <!-- Showing Sequence Screen -->
+        <div id="sequence-screen" class="hidden flex flex-col items-center justify-center space-y-6 w-full">
+            <div class="text-sm font-semibold text-cyan-300 uppercase tracking-widest bg-cyan-900/60 px-4 py-1.5 rounded-full border border-cyan-400/30">
+                라운드 <span id="current-round">1</span> - 순서 기억 중!
+            </div>
+            <div id="display-box" class="h-40 w-full bg-black/40 rounded-2xl flex items-center justify-center border border-pink-500/30 shadow-[inset_0_0_20px_rgba(236,72,153,0.3)]">
+                <span id="sequence-char" class="text-7xl md:text-8xl font-black text-pink-400 drop-shadow-[0_0_20px_rgba(236,72,153,0.8)] pulse-pop">A</span>
+            </div>
+            <div class="w-full bg-white/10 h-2.5 rounded-full overflow-hidden shadow-inner">
+                <div id="sequence-progress" class="bg-gradient-to-r from-pink-500 via-purple-500 to-cyan-400 h-full w-0 transition-all duration-100 shadow-[0_0_10px_rgba(236,72,153,0.8)]"></div>
+            </div>
+        </div>
+
+        <!-- Input Screen -->
+        <div id="input-screen" class="hidden flex flex-col items-center justify-center space-y-6 w-full relative">
+            <div class="text-center">
+                <h3 class="text-xl font-bold text-white mb-1">기억한 순서대로 입력하세요!</h3>
+                <p id="coach-msg" class="text-xs text-pink-300 font-semibold animate-pulse">키보드를 누르거나 아래 가상 건반을 터치하세요</p>
+            </div>
+
+            <!-- Timer Bar -->
+            <div class="w-full flex items-center space-x-3 bg-black/30 px-4 py-2 rounded-xl border border-cyan-500/30">
+                <div class="text-xs font-bold text-cyan-400 whitespace-nowrap">남은 시간: <span id="timer-text">10.0</span>초</div>
+                <div class="w-full bg-white/10 h-3 rounded-full overflow-hidden shadow-inner">
+                    <div id="timer-progress" class="bg-gradient-to-r from-cyan-400 to-pink-500 h-full w-full transition-all duration-100"></div>
+                </div>
+            </div>
+
+            <!-- Visual Slots for Input -->
+            <div id="input-slots" class="flex flex-wrap justify-center gap-2 md:gap-3 max-w-full my-2">
+                <!-- Dynamic slots injected via JS -->
+            </div>
+
+            <!-- Feedback / Congratulatory Burst container -->
+            <div id="feedback-popup" class="absolute inset-0 bg-black/70 backdrop-blur-md rounded-3xl flex flex-col items-center justify-center hidden z-20">
+                <div id="feedback-icon" class="w-24 h-24 rounded-full flex items-center justify-center text-5xl mb-3 shadow-2xl"></div>
+                <h4 id="feedback-text" class="text-2xl font-black text-white">정답입니다! 🎉</h4>
+            </div>
+        </div>
+
+        <!-- Game Over / Success Screen -->
+        <div id="gameover-screen" class="hidden flex flex-col items-center justify-center space-y-6 w-full text-center">
+            <div id="result-icon" class="text-6xl animate-bounce">💥</div>
+            <div>
+                <h3 id="result-title" class="text-3xl font-black text-white mb-2">틀렸습니다!</h3>
+                <p id="result-desc" class="text-purple-200 text-sm">아쉽네요! 다시 EDM 비트에 맞춰 도전해보세요.</p>
+            </div>
+            <div class="bg-white/5 rounded-2xl p-4 w-full border border-white/10">
+                <p class="text-sm text-purple-300">최종 달성 라운드</p>
+                <p id="final-score" class="text-4xl font-black text-cyan-300 mt-1">라운드 1 / 10</p>
+            </div>
+            <button id="restart-btn" class="w-full py-4 bg-gradient-to-r from-pink-500 to-purple-600 hover:opacity-95 active:scale-95 transition-all text-white font-bold text-lg rounded-2xl shadow-[0_0_20px_rgba(236,72,153,0.6)] cursor-pointer">
+                다시 시작하기 🔄
+            </button>
+        </div>
+
+    </main>
+
+    <footer class="w-full max-w-xl mt-6 flex flex-col items-center">
+        <div id="virtual-keyboard" class="hidden grid grid-cols-7 gap-1.5 md:gap-2 w-full max-w-md bg-white/5 p-3 rounded-2xl border border-white/10 backdrop-blur-sm">
+            <!-- Dynamically populated buttons -->
+        </div>
+        <p class="text-xs text-purple-300 mt-4">Powered by Tone.js EDM Synth & Tailwind CSS</p>
+    </footer>
 
     <script>
-        let synth, bassSynth, drumKick, drumHiHat;
-        let loopBGM;
-        let isAudioInitialized = false;
+        // DOM Element references
+        const startScreen = document.getElementById('start-screen');
+        const countdownScreen = document.getElementById('countdown-screen');
+        const countdownNumber = document.getElementById('countdown-number');
+        const sequenceScreen = document.getElementById('sequence-screen');
+        const currentRoundEl = document.getElementById('current-round');
+        const sequenceCharEl = document.getElementById('sequence-char');
+        const sequenceProgress = document.getElementById('sequence-progress');
+        const inputScreen = document.getElementById('input-screen');
+        const coachMsg = document.getElementById('coach-msg');
+        const timerText = document.getElementById('timer-text');
+        const timerProgress = document.getElementById('timer-progress');
+        const inputSlots = document.getElementById('input-slots');
+        const feedbackPopup = document.getElementById('feedback-popup');
+        const feedbackIcon = document.getElementById('feedback-icon');
+        const feedbackText = document.getElementById('feedback-text');
+        const gameoverScreen = document.getElementById('gameover-screen');
+        const resultIcon = document.getElementById('result-icon');
+        const resultTitle = document.getElementById('result-title');
+        const resultDesc = document.getElementById('result-desc');
+        const finalScoreEl = document.getElementById('final-score');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const virtualKeyboard = document.getElementById('virtual-keyboard');
 
+        // Game State
+        const MAX_ROUNDS = 10;
         let currentRound = 1;
-        let score = 0;
-        let targetSequence = [];
-        let playerInputIndex = 0;
-        let currentSequenceLength = 3;
+        let sequence = [];
+        let currentIndex = 0;
+        let isPlayingSequence = false;
         
-        let gameState = 'IDLE'; // IDLE, COUNTDOWN, SHOWING, INPUT, GAMEOVER, CLEAR
+        // Timer variables
         let inputTimer = null;
-        let timeLeft = 10;
-        let timerInterval = null;
+        let timeLeft = 10.0;
+        const totalInputTime = 10.0;
+        let lastSpokenSecond = 6;
 
-        const alphabetList = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'J', 'K', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z'];
+        // Audio instruments
+        let leadSynth = null;
+        let kickSynth = null;
+        let hihatSynth = null;
+        let bassSynth = null;
+        let edmLoop = null;
 
-        const coachTaunts = [
-            ["빨리 외워!", "시간 없다!", "정신 차려!"],
-            ["더 빨라진다!", "긴장해!", "놓치지 마!"],
-            ["거의 다 왔다!", "끝까지 집중!", "아주 빨라!"]
-        ];
+        // Alphabet pool
+        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
 
-        // 사운드 시스템 초기화 (모바일 터치 대응)
-        async function initAudio() {
-            if (isAudioInitialized) return;
-            await Tone.start();
-            
-            // 신시사이저 및 드럼 구성 (EDM 스타일)
-            synth = new Tone.Synth({
-                oscillator: { type: "sawtooth" },
-                envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.1 }
-            }).toDestination();
-
-            bassSynth = new Tone.MonoSynth({
-                oscillator: { type: "square" },
-                envelope: { attack: 0.05, decay: 0.2, sustain: 0.0, release: 0.1 },
-                filterEnvelope: { attack: 0.01, decay: 0.2, baseFrequency: 200, octaves: 2 }
-            }).toDestination();
-
-            drumKick = new Tone.MembraneSynth({
-                pitchDecay: 0.05,
-                octaves: 4,
-                oscillator: { type: "sine" },
-                envelope: { attack: 0.001, decay: 0.3, sustain: 0, release: 0.1 }
-            }).toDestination();
-
-            drumHiHat = new Tone.NoiseSynth({
-                noise: { type: "white" },
-                envelope: { attack: 0.005, decay: 0.05, sustain: 0, release: 0.05 }
-            }).toDestination();
-
-            // EDM 128 BPM 루프 비트 설정
-            Tone.Transport.bpm.value = 128;
-            
-            let step = 0;
-            loopBGM = new Tone.Loop(time => {
-                if (step % 4 === 0) {
-                    drumKick.triggerAttackRelease("C1", "8n", time);
+        // Initialize Tone.js high-energy EDM sound engine with robust mobile audio unlock
+        async function initEdmAudio() {
+            try {
+                await Tone.start();
+                if (Tone.context.state !== 'running') {
+                    await Tone.context.resume();
                 }
-                if (step % 2 !== 0) {
-                    drumHiHat.triggerAttackRelease("16n", time, 0.3);
+
+                if (!leadSynth) {
+                    leadSynth = new Tone.Synth({
+                        oscillator: { type: "sawtooth" },
+                        envelope: { attack: 0.005, decay: 0.15, sustain: 0.1, release: 0.3 }
+                    }).toDestination();
+                    leadSynth.volume.value = -4;
                 }
-                if (step % 8 === 0) {
-                    bassSynth.triggerAttackRelease("C2", "8n", time);
-                } else if (step % 8 === 4) {
-                    bassSynth.triggerAttackRelease("G1", "8n", time);
+
+                if (!kickSynth) {
+                    kickSynth = new Tone.MembraneSynth({
+                        pitchDecay: 0.05,
+                        octaves: 6,
+                        oscillator: { type: "sine" },
+                        envelope: { attack: 0.001, decay: 0.4, sustain: 0.01, release: 0.4 }
+                    }).toDestination();
                 }
-                step = (step + 1) % 16;
-            }, "8n");
 
-            isAudioInitialized = true;
-        }
-
-        // 효과음 함수들
-        function playBip(note = "C5", duration = "16n") {
-            if (!isAudioInitialized) return;
-            synth.triggerAttackRelease(note, duration);
-        }
-
-        function playCorrectSound() {
-            if (!isAudioInitialized) return;
-            synth.triggerAttackRelease("E5", "16n");
-            setTimeout(() => synth.triggerAttackRelease("G5", "8n"), 80);
-        }
-
-        function playWrongSound() {
-            if (!isAudioInitialized) return;
-            bassSynth.triggerAttackRelease("C1", "4n");
-        }
-
-        // 비프음 기반 카운트다운 (음성 합성 완전 배제)
-        async function playBeepCountdown(callback) {
-            gameState = 'COUNTDOWN';
-            document.getElementById('start-btn').classList.add('hidden');
-            document.getElementById('status-bar').classList.remove('hidden');
-            
-            const msgArea = document.getElementById('message-area');
-            
-            for (let i = 3; i > 0; i--) {
-                msgArea.innerHTML = `<span class="text-5xl font-black text-cyan-400 pop-effect">${i}</span>`;
-                playBip("C4", "8n");
-                await new Promise(r => setTimeout(r, 1000));
-            }
-            
-            msgArea.innerHTML = `<span class="text-4xl font-black text-fuchsia-400 pop-effect">시작!</span>`;
-            playBip("G5", "4n");
-            await new Promise(r => setTimeout(r, 600));
-            
-            callback();
-        }
-
-        async function startGame() {
-            await initAudio();
-            Tone.Transport.start();
-            loopBGM.start(0);
-
-            currentRound = 1;
-            score = 0;
-            currentSequenceLength = 3;
-            updateStatusBar();
-            
-            startRound();
-        }
-
-        function updateStatusBar() {
-            document.getElementById('round-display').innerText = `라운드: ${currentRound} / 10`;
-            document.getElementById('score-display').innerText = `점수: ${score}`;
-        }
-
-        function startRound() {
-            gameState = 'SHOWING';
-            playerInputIndex = 0;
-            document.getElementById('input-slots').innerHTML = '';
-            document.getElementById('coach-message').innerText = '';
-            
-            // 라운드별 속도 계산 (1라운드 1000ms -> 10라운드 450ms)
-            let showInterval = Math.max(450, 1050 - (currentRound * 65));
-
-            // 랜덤 시퀀스 생성
-            targetSequence = [];
-            let tempPool = [...alphabetList];
-            for(let i=0; i<currentSequenceLength; i++) {
-                let idx = Math.floor(Math.random() * tempPool.length);
-                targetSequence.push(tempPool[idx]);
-            }
-
-            let index = 0;
-            const msgArea = document.getElementById('message-area');
-
-            const showIntervalId = setInterval(() => {
-                if (index < targetSequence.length) {
-                    msgArea.innerHTML = `<span class="text-6xl font-black text-white pop-effect">${targetSequence[index]}</span>`;
-                    playBip("A4", "16n");
-                    index++;
-                } else {
-                    clearInterval(showIntervalId);
-                    setTimeout(() => {
-                        startInputPhase();
-                    }, 500);
+                if (!hihatSynth) {
+                    hihatSynth = new Tone.NoiseSynth({
+                        noise: { type: "white" },
+                        envelope: { attack: 0.001, decay: 0.05, sustain: 0, release: 0.05 }
+                    }).toDestination();
+                    hihatSynth.volume.value = -10;
                 }
-            }, showInterval);
-        }
 
-        function startInputPhase() {
-            gameState = 'INPUT';
-            document.getElementById('message-area').innerHTML = `<span class="text-xl font-bold text-cyan-300">순서대로 입력하세요!</span>`;
-            
-            // 타이머바 및 입력 슬롯 생성
-            timeLeft = 10;
-            document.getElementById('timer-bar-container').classList.remove('hidden');
-            updateTimerBar();
-
-            const slotsContainer = document.getElementById('input-slots');
-            slotsContainer.innerHTML = '';
-            for(let i=0; i<targetSequence.length; i++) {
-                slotsContainer.innerHTML += `<div id="slot-${i}" class="w-10 h-12 bg-slate-900 border-2 border-slate-700 rounded-lg flex items-center justify-center text-xl font-bold text-slate-500 shadow-inner">_</div>`;
-            }
-
-            // 코칭 및 타이머 루프 시작
-            setRandomCoachTaunt();
-            
-            timerInterval = setInterval(() => {
-                timeLeft -= 0.1;
-                if(timeLeft <= 0) {
-                    timeLeft = 0;
-                    clearInterval(timerInterval);
-                    gameOver("시간 초과!");
-                    return;
+                if (!bassSynth) {
+                    bassSynth = new Tone.Synth({
+                        oscillator: { type: "square" },
+                        envelope: { attack: 0.01, decay: 0.2, sustain: 0.2, release: 0.2 }
+                    }).toDestination();
+                    bassSynth.volume.value = -6;
                 }
-                updateTimerBar();
 
-                // 5초 이하 경고 배경 및 비프음 카운트다운
-                if (timeLeft <= 5.0) {
-                    document.getElementById('body-bg').classList.add('bg-emergency');
-                    if (Math.abs(timeLeft - Math.round(timeLeft)) < 0.05) {
-                        playBip("C6", "32n");
+                const melodyNotes = ["C4", "Eb4", "G4", "Bb4", "C5", "G4", "Eb4", "F4"];
+                let step = 0;
+
+                if (edmLoop) edmLoop.dispose();
+
+                Tone.Transport.bpm.value = 130;
+
+                edmLoop = new Tone.Loop(time => {
+                    if (step % 2 === 0) {
+                        kickSynth.triggerAttackRelease("C1", "8n", time);
                     }
+                    hihatSynth.triggerAttackRelease("16n", time);
+                    leadSynth.triggerAttackRelease(melodyNotes[step % melodyNotes.length], "8n", time);
+                    step++;
+                }, "8n");
+
+                edmLoop.start(0);
+                if (Tone.Transport.state !== "started") {
+                    Tone.Transport.start();
+                }
+
+            } catch (e) {
+                console.warn("EDM Audio Context initialization warning:", e);
+            }
+        }
+
+        // Play feedback notes or user input tones
+        function playTone(note, duration = "8n") {
+            if (leadSynth) {
+                try {
+                    leadSynth.triggerAttackRelease(note, duration);
+                } catch (e) {}
+            }
+        }
+
+        // Generate random sequence based on round length (Length grows from 3 to 12)
+        function generateSequence(length) {
+            let seq = [];
+            for (let i = 0; i < length; i++) {
+                const randomChar = alphabet[Math.floor(Math.random() * alphabet.length)];
+                seq.push(randomChar);
+            }
+            return seq;
+        }
+
+        // Start Game Flow with reliable user gesture handling
+        startBtn.addEventListener('click', async () => {
+            await initEdmAudio();
+            currentRound = 1;
+            startScreen.classList.add('hidden');
+            runCountdown();
+        });
+
+        restartBtn.addEventListener('click', async () => {
+            await initEdmAudio();
+            currentRound = 1;
+            gameoverScreen.classList.add('hidden');
+            runCountdown();
+        });
+
+        // Countdown 3 -> 2 -> 1
+        function runCountdown() {
+            countdownScreen.classList.remove('hidden');
+            let count = 3;
+            countdownNumber.textContent = count;
+            playTone("C5", "4n");
+
+            const timer = setInterval(() => {
+                count--;
+                if (count > 0) {
+                    countdownNumber.textContent = count;
+                    countdownNumber.classList.remove('pulse-pop');
+                    void countdownNumber.offsetWidth; 
+                    countdownNumber.classList.add('pulse-pop');
+                    playTone("Eb5", "4n");
+                } else if (count === 0) {
+                    countdownNumber.textContent = "LET'S GO! 🔥";
+                    playTone("G5", "4n");
+                } else {
+                    clearInterval(timer);
+                    countdownScreen.classList.add('hidden');
+                    startRound();
+                }
+            }, 800);
+        }
+
+        // Start a specific Round
+        function startRound() {
+            sequenceScreen.classList.remove('hidden');
+            currentRoundEl.textContent = `${currentRound} / ${MAX_ROUNDS}`;
+            
+            const seqLength = 2 + currentRound;
+            sequence = generateSequence(seqLength);
+            currentIndex = 0;
+            isPlayingSequence = true;
+
+            showSequenceStep(0);
+        }
+
+        // Display sequence one by one
+        function showSequenceStep(index) {
+            if (index < sequence.length) {
+                sequenceCharEl.textContent = sequence[index];
+                sequenceCharEl.classList.remove('pulse-pop');
+                void sequenceCharEl.offsetWidth;
+                sequenceCharEl.classList.add('pulse-pop');
+                
+                const notesPool = ["C5", "Eb5", "G5", "Bb5", "C6", "G5", "Eb5"];
+                playTone(notesPool[index % notesPool.length], "8n");
+
+                const progressPercent = ((index + 1) / sequence.length) * 100;
+                sequenceProgress.style.width = `${progressPercent}%`;
+
+                const displayDuration = Math.max(350, 900 - (currentRound * 55));
+                
+                setTimeout(() => {
+                    showSequenceStep(index + 1);
+                }, displayDuration);
+            } else {
+                isPlayingSequence = false;
+                setTimeout(() => {
+                    sequenceScreen.classList.add('hidden');
+                    setupInputPhase();
+                }, 400);
+            }
+        }
+
+        // Setup Input Phase UI with 10s Timer & Side Coaching
+        function setupInputPhase() {
+            inputScreen.classList.remove('hidden');
+            inputSlots.innerHTML = '';
+            currentIndex = 0;
+            timeLeft = 10.0;
+            lastSpokenSecond = 6;
+
+            const coachMessages = [
+                "차분하게 순서대로 입력하세요!",
+                "벌써 긴장되나요? 집중하세요!",
+                "손을 바쁘게 움직여봐요!",
+                "시간이 얼마 없어요, 서두르세요!",
+                "놓치면 끝입니다! 정신 바짝 차려요!",
+                "비트가 빨라집니다! 타이머 작동 중!",
+                "조급해지지 말고 정확하게!",
+                "거의 다 왔어요! 속도 내세요!",
+                "극도의 긴장감! 실수하면 탈락입니다!",
+                "마지막 결전 라운드! 모든 걸 쏟아부으세요!"
+            ];
+            coachMsg.textContent = coachMessages[(currentRound - 1) % coachMessages.length];
+
+            for (let i = 0; i < sequence.length; i++) {
+                const slot = document.createElement('div');
+                slot.className = 'w-11 h-13 md:w-13 md:h-15 bg-white/10 border-2 border-white/30 rounded-xl flex items-center justify-center text-2xl md:text-3xl font-black text-white shadow-inner transition-all duration-200';
+                slot.id = `slot-${i}`;
+                slot.textContent = '_';
+                inputSlots.appendChild(slot);
+            }
+
+            setupVirtualKeyboard();
+            startInputTimer();
+        }
+
+        // Start 10-second timer countdown with exact precision interval (100ms)
+        function startInputTimer() {
+            if (inputTimer) clearInterval(inputTimer);
+
+            const startTime = Date.now();
+            const durationMs = 10000; // 10 seconds
+
+            inputTimer = setInterval(() => {
+                const elapsed = Date.now() - startTime;
+                timeLeft = Math.max(0, (durationMs - elapsed) / 1000);
+
+                timerText.textContent = timeLeft.toFixed(1);
+                const percent = (timeLeft / totalInputTime) * 100;
+                timerProgress.style.width = `${percent}%`;
+
+                const currentSecCeil = Math.ceil(timeLeft);
+                if (currentSecCeil <= 5 && currentSecCeil > 0) {
+                    document.getElementById('main-body').classList.add('emergency-mode');
+
+                    if (currentSecCeil < lastSpokenSecond) {
+                        lastSpokenSecond = currentSecCeil;
+                        playTone("G3", "8n");
+                    }
+                } else {
+                    document.getElementById('main-body').classList.remove('emergency-mode');
+                }
+
+                if (timeLeft <= 0) {
+                    clearInterval(inputTimer);
+                    document.getElementById('main-body').classList.remove('emergency-mode');
+                    virtualKeyboard.classList.add('hidden');
+                    showGameOverScreen(false, "시간 초과! 너무 늦었습니다!");
                 }
             }, 100);
-
-            // 키보드 입력 리스너 등록
-            window.addEventListener('keydown', handleKeyInput);
         }
 
-        function updateTimerBar() {
-            let percent = (timeLeft / 10) * 100;
-            document.getElementById('timer-bar').style.width = `${percent}%`;
-        }
-
-        function setRandomCoachTaunt() {
-            let tier = currentRound <= 3 ? 0 : currentRound <= 7 ? 1 : 2;
-            let pool = coachTaunts[tier];
-            let taunt = pool[Math.floor(Math.random() * pool.length)];
-            document.getElementById('coach-message').innerText = `🔥 ${taunt}`;
-        }
-
-        function handleKeyInput(e) {
-            if (gameState !== 'INPUT') return;
-            let keyPressed = e.key.toUpperCase();
+        // Populate virtual keyboard with pointerdown to fix mobile touch responsiveness
+        function setupVirtualKeyboard() {
+            virtualKeyboard.classList.remove('hidden');
+            virtualKeyboard.innerHTML = '';
             
-            if (alphabetList.includes(keyPressed)) {
-                processInput(keyPressed);
-            }
-        }
-
-        function processInput(char) {
-            let expectedChar = targetSequence[playerInputIndex];
-            
-            if (char === expectedChar) {
-                // 정답 맞춤
-                playCorrectSound();
-                let slot = document.getElementById(`slot-${playerInputIndex}`);
-                slot.innerText = char;
-                slot.className = "w-10 h-12 bg-cyan-950 border-2 border-cyan-400 rounded-lg flex items-center justify-center text-xl font-bold text-cyan-300 shadow-lg pop-effect";
+            const keys = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+            keys.forEach(char => {
+                const btn = document.createElement('button');
+                btn.className = 'py-2 bg-white/10 hover:bg-white/25 active:bg-cyan-500 rounded-lg text-white font-bold text-sm md:text-base border border-white/15 shadow-[0_0_10px_rgba(255,255,255,0.05)] transition-all cursor-pointer select-none';
+                btn.textContent = char;
                 
-                score += 100 * currentRound;
-                updateStatusBar();
-                playerInputIndex++;
+                // Using pointerdown ensures instantaneous response on mobile touchscreens without 300ms click delay
+                btn.addEventListener('pointerdown', (e) => {
+                    e.preventDefault();
+                    handleInput(char);
+                });
+                
+                virtualKeyboard.appendChild(btn);
+            });
+        }
 
-                if (playerInputIndex === targetSequence.length) {
-                    // 라운드 클리어
-                    cleanupRound();
-                    if (currentRound >= 10) {
-                        gameClear();
+        window.addEventListener('keydown', (e) => {
+            if (isPlayingSequence || inputScreen.classList.contains('hidden')) return;
+            const key = e.key.toUpperCase();
+            if (/^[A-Z]$/.test(key)) {
+                handleInput(key);
+            }
+        });
+
+        // Handle user typing and inputs
+        function handleInput(char) {
+            if (isPlayingSequence || inputScreen.classList.contains('hidden')) return;
+
+            const expectedChar = sequence[currentIndex];
+            const currentSlot = document.getElementById(`slot-${currentIndex}`);
+
+            if (char === expectedChar) {
+                currentSlot.textContent = char;
+                currentSlot.classList.remove('bg-white/10', 'border-white/30');
+                currentSlot.classList.add('correct-burst');
+                
+                playTone("C6", "16n");
+                triggerMiniBurst(currentSlot);
+
+                currentIndex++;
+
+                if (currentIndex === sequence.length) {
+                    clearInterval(inputTimer);
+                    virtualKeyboard.classList.add('hidden');
+                    
+                    if (currentRound >= MAX_ROUNDS) {
+                        showGameOverScreen(true);
                     } else {
-                        currentRound++;
-                        currentSequenceLength++;
-                        document.getElementById('message-area').innerHTML = `<span class="text-2xl font-bold text-emerald-400">라운드 클리어! 🎉</span>`;
-                        setTimeout(startRound, 1500);
+                        showSuccessFeedback();
                     }
                 }
             } else {
-                // 오답
-                playWrongSound();
-                cleanupRound();
-                gameOver("틀렸습니다! 게임 오버");
+                clearInterval(inputTimer);
+                currentSlot.textContent = char;
+                currentSlot.classList.add('bg-red-500/50', 'border-red-500', 'shake');
+                playTone("G2", "4n");
+                
+                virtualKeyboard.classList.add('hidden');
+                setTimeout(() => {
+                    showGameOverScreen(false, "틀렸습니다! 처음부터 다시 도전!");
+                }, 600);
             }
         }
 
-        function cleanupRound() {
-            clearInterval(timerInterval);
-            window.removeEventListener('keydown', handleKeyInput);
-            document.getElementById('timer-bar-container').classList.add('hidden');
-            document.getElementById('body-bg').classList.remove('bg-emergency');
-            document.getElementById('coach-message').innerText = '';
+        function triggerMiniBurst(element) {
+            const rect = element.getBoundingClientRect();
+            const circle = document.createElement('div');
+            circle.className = 'fixed pointer-events-none rounded-full bg-cyan-400/80 z-50 shadow-[0_0_20px_#22d3ee]';
+            circle.style.width = '35px';
+            circle.style.height = '35px';
+            circle.style.left = `${rect.left + rect.width / 2 - 17}px`;
+            circle.style.top = `${rect.top + rect.height / 2 - 17}px`;
+            circle.style.transition = 'all 0.4s ease-out';
+            document.body.appendChild(circle);
+
+            setTimeout(() => {
+                circle.style.transform = 'scale(4)';
+                circle.style.opacity = '0';
+            }, 10);
+
+            setTimeout(() => {
+                circle.remove();
+            }, 400);
         }
 
-        function gameOver(reason) {
-            gameState = 'GAMEOVER';
-            Tone.Transport.stop();
-            if(loopBGM) loopBGM.stop();
+        function showSuccessFeedback() {
+            document.getElementById('main-body').classList.remove('emergency-mode');
+            feedbackIcon.textContent = "🔥";
+            feedbackIcon.className = "w-24 h-24 rounded-full flex items-center justify-center text-5xl mb-3 shadow-[0_0_30px_rgba(6,182,212,0.9)] bg-gradient-to-tr from-cyan-400 to-pink-500 pulse-pop";
+            feedbackText.textContent = `라운드 ${currentRound} 클리어! 🚀`;
+            feedbackPopup.classList.remove('hidden');
 
-            document.getElementById('message-area').innerHTML = `
-                <div class="text-center">
-                    <div class="text-xl font-bold text-rose-500 mb-1">${reason}</div>
-                    <div class="text-sm text-slate-400">최종 점수: ${score}점</div>
-                </div>
-            `;
-            
-            let btn = document.getElementById('start-btn');
-            btn.innerText = "다시 도전하기";
-            btn.classList.remove('hidden');
+            playTone("Eb6", "8n");
+            setTimeout(() => playTone("G6", "8n"), 150);
+
+            setTimeout(() => {
+                feedbackPopup.classList.add('hidden');
+                inputScreen.classList.add('hidden');
+                currentRound++;
+                runCountdown();
+            }, 1200);
         }
 
-        function gameClear() {
-            gameState = 'CLEAR';
-            Tone.Transport.stop();
-            if(loopBGM) loopBGM.stop();
+        function showGameOverScreen(isSuccess, customMsg = "") {
+            document.getElementById('main-body').classList.remove('emergency-mode');
+            inputScreen.classList.add('hidden');
+            gameoverScreen.classList.remove('hidden');
+            virtualKeyboard.classList.add('hidden');
 
-            document.getElementById('message-area').innerHTML = `
-                <div class="text-center">
-                    <div class="text-2xl font-black text-amber-400 mb-1">모든 라운드 돌파 완료! 🏆</div>
-                    <div class="text-sm text-slate-300">최종 스코어: ${score}점</div>
-                </div>
-            `;
-
-            let btn = document.getElementById('start-btn');
-            btn.innerText = "처음부터 다시하기";
-            btn.classList.remove('hidden');
+            if (isSuccess) {
+                resultIcon.textContent = "👑";
+                resultTitle.textContent = "10라운드 최종 마스터 달성!";
+                resultDesc.textContent = "대단합니다! 모든 비트와 제한시간을 극복하셨습니다!";
+            } else {
+                resultIcon.textContent = "💥";
+                resultTitle.textContent = "게임 오버!";
+                resultDesc.textContent = customMsg || "아쉽네요! 다시 도전해보세요.";
+            }
+            finalScoreEl.textContent = `라운드 ${currentRound} / ${MAX_ROUNDS}`;
         }
     </script>
 </body>
